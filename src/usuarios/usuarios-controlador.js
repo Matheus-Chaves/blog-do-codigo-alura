@@ -1,6 +1,17 @@
 const Usuario = require("./usuarios-modelo");
 const { InvalidArgumentError, InternalServerError } = require("../erros");
 
+const jwt = require("jsonwebtoken");
+function criaTokenJWT(usuario) {
+  const payload = {
+    id: usuario.id,
+  }; //payload que irá compor o token
+
+  //assina o token com payload + senha secreta
+  const token = jwt.sign(payload, "senha-secreta");
+  return token;
+}
+
 module.exports = {
   adiciona: async (req, res) => {
     const { nome, email, senha } = req.body;
@@ -28,6 +39,9 @@ module.exports = {
   },
 
   login: async (req, res) => {
+    //'user' é recebido pelo passport-local.strategy, criado nas estratégias de autenticação
+    const token = criaTokenJWT(req.user);
+    res.set("Authorization", token);
     res.status(204).send();
   },
 
