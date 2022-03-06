@@ -1,10 +1,12 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const BearerStrategy = require("passport-http-bearer").Strategy;
 
 const Usuario = require("./usuarios-modelo");
 const { InvalidArgumentError } = require("../erros");
 
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 function verificaUsuario(usuario) {
   if (!usuario) {
@@ -38,4 +40,18 @@ passport.use(
       }
     }
   )
+);
+
+passport.use(
+  new BearerStrategy(async (token, done) => {
+    try {
+      //O JWT precisa ser verificado se está válido
+      const payload = jwt.verify(token, process.env.CHAVE_JWT);
+      //Caso estiver válido, retorna o payload, senão, erro.
+      const usuario = await Usuario.buscaPorId(payload.id);
+      done(null, usuario);
+    } catch (error) {
+      done(error);
+    }
+  })
 );
