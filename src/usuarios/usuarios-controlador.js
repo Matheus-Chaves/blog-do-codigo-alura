@@ -8,7 +8,7 @@ function criaTokenJWT(usuario) {
   }; //payload que irá compor o token
 
   //assina o token com payload + senha secreta
-  const token = jwt.sign(payload, process.env.CHAVE_JWT);
+  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: "15m" });
   return token;
 }
 
