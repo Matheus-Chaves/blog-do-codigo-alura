@@ -2,7 +2,9 @@ const Usuario = require("./usuarios-modelo");
 const { InvalidArgumentError } = require("../erros");
 
 const jwt = require("jsonwebtoken");
-const blocklist = require("../../redis/manipula-blacklist");
+const blocklist = require("../../redis/manipula-blocklist");
+
+const crypto = require("crypto");
 
 function criaTokenJWT(usuario) {
   const payload = {
@@ -11,6 +13,17 @@ function criaTokenJWT(usuario) {
 
   const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: "15m" });
   return token;
+}
+//Token Opaco também leva o nome de Refresh Token
+function criaTokenOpaco(usuario) {
+  const tokenOpaco = crypto.randomBytes(24).toString("hex");
+  const qtdDeDias = 5;
+  const qtdDeDiasEmMilissegundos = 60 * 60 * 24 * qtdDeDias * 1000;
+  const dataExpiracaoEmUnix = Math.round(
+    (Date.now() + qtdDeDiasEmMilissegundos) / 1000
+  );
+
+  return tokenOpaco;
 }
 
 module.exports = {
@@ -37,9 +50,10 @@ module.exports = {
   async login(req, res) {
     try {
       //'user' é recebido pelo passport-local.strategy, criado nas estratégias de autenticação
-      const token = criaTokenJWT(req.user);
-      res.set("Authorization", token);
-      res.status(204).json();
+      const accessToken = criaTokenJWT(req.user);
+      const refreshToken = criaTokenOpaco(req.user);
+      res.set("Authorization", accessToken);
+      res.status(200).json({ refreshToken });
     } catch (erro) {
       res.status(500).json({ erro: erro.message });
     }
