@@ -1,19 +1,19 @@
 const Usuario = require("./usuarios-modelo");
 const { InvalidArgumentError } = require("../erros");
 const tokens = require("./tokens");
+const emails = require("./emails");
 
 module.exports = {
   async adiciona(req, res) {
     const { nome, email, senha } = req.body;
 
     try {
-      const usuario = new Usuario({
-        nome,
-        email,
-      });
+      const usuario = new Usuario({ nome, email });
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
-
+      /*o envio é lento, então executamos assincronamente o método enviaEmail
+        Então precisamos do catch para capturar futuros erros*/
+      emails.enviaEmail(usuario).catch(console.log);
       res.status(201).json();
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
