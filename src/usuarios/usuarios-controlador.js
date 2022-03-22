@@ -13,7 +13,7 @@ module.exports = {
     const { nome, email, senha } = req.body;
 
     try {
-      const usuario = new Usuario({ nome, email });
+      const usuario = new Usuario({ nome, email, emailVerificado: false });
       await usuario.adicionaSenha(senha);
       await usuario.adiciona();
       /*o envio é lento, então executamos assincronamente o método enviaEmail
