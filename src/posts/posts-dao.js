@@ -30,7 +30,7 @@ module.exports = {
 
   async listarTodos() {
     try {
-      return await dbAll("SELECT id, titulo FROM posts");
+      return await dbAll("SELECT id, titulo, conteudo, autor FROM posts");
     } catch (erro) {
       throw new InternalServerError("Erro ao listar os posts!");
     }
@@ -38,10 +38,17 @@ module.exports = {
 
   async buscaPorId(id, idAutor) {
     try {
-      return await dbGet("SELECT * FROM posts WHERE id = ? AND autor = ?", [
-        id,
-        idAutor,
-      ]);
+      let instrucoes = "SELECT * FROM posts WHERE id = ?";
+      const parametros = [id];
+
+      idAutor = Number(idAutor);
+      //verificamos caso o idAutor exista (não é NaN)
+      if (isNaN(idAutor) === false) {
+        instrucoes = `${instrucoes} AND autor = ?`;
+        parametros.push(idAutor);
+      }
+
+      return await dbGet(instrucoes, parametros);
     } catch (erro) {
       throw new InternalServerError("Não foi possível encontrar o post!");
     }
