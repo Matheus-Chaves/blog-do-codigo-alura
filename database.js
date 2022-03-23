@@ -5,9 +5,10 @@ const POSTS_SCHEMA = `
   CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo VARCHAR(50) NOT NULL,
-    conteudo VARCHAR(140)
-  )
-  `;
+    conteudo VARCHAR(140),
+    autor INTEGER NOT NULL,
+    FOREIGN KEY (autor) REFERENCES usuarios(id)
+  )`;
 
 const USUARIOS_SCHEMA = `
   CREATE TABLE IF NOT EXISTS usuarios (
@@ -15,9 +16,9 @@ const USUARIOS_SCHEMA = `
     nome VARCHAR(40) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     senhaHash VARCHAR(255) NOT NULL,
-    emailVerificado INTEGER
-  )
-  `;
+    emailVerificado INTEGER,
+    cargo VARCHAR(15) CHECK (cargo IN ('admin', 'editor', 'assinante')) NOT NULL
+  )`;
 
 db.serialize(() => {
   db.run("PRAGMA foreign_keys=ON");
