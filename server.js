@@ -13,6 +13,22 @@ const {
 } = require("./src/erros");
 const jwt = require("jsonwebtoken");
 
+//Middleware para
+app.use((req, res, next) => {
+  const accept = req.get("Accept");
+
+  if (accept !== "application/json" && accept !== "*/*") {
+    res.status(406).end();
+    return;
+  }
+
+  res.set({
+    "Content-Type": "application/json",
+  });
+
+  next();
+});
+
 const routes = require("./rotas");
 routes(app);
 
