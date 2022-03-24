@@ -2,20 +2,20 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const BearerStrategy = require("passport-http-bearer").Strategy;
 const Usuario = require("./usuarios-modelo");
-const { InvalidArgumentError } = require("../erros");
+const { NaoAutorizado } = require("../erros");
 const bcrypt = require("bcrypt");
 const tokens = require("./tokens");
 
 function verificaUsuario(usuario) {
   if (!usuario) {
-    throw new InvalidArgumentError("Não existe usuário com esse e-mail.");
+    throw new NaoAutorizado();
   }
 }
 
 async function verificaSenha(senha, senhaHash) {
   const senhaValida = await bcrypt.compare(senha, senhaHash);
   if (!senhaValida) {
-    throw new InvalidArgumentError("Senha inválida.");
+    throw new NaoAutorizado();
   }
 }
 

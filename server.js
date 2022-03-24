@@ -6,7 +6,11 @@ const port = 3000;
 //const db = require("./database");
 require("./redis/blocklist-access-token");
 require("./redis/allowlist-refresh-token");
-const { InvalidArgumentError } = require("./src/erros");
+const {
+  InvalidArgumentError,
+  NaoEncontrado,
+  NaoAutorizado,
+} = require("./src/erros");
 const jwt = require("jsonwebtoken");
 
 const routes = require("./rotas");
@@ -26,6 +30,10 @@ app.use((err, req, res, next) => {
   } else if (err instanceof jwt.TokenExpiredError) {
     status = 401;
     corpo.expiradoEm = err.expiredAt;
+  } else if (err instanceof NaoEncontrado) {
+    status = 404;
+  } else if (err instanceof NaoAutorizado) {
+    status = 401;
   }
 
   res.status(status).json(corpo);
