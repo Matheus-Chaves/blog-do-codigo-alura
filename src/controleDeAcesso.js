@@ -1,13 +1,14 @@
 const AccessControl = require("accesscontrol");
 const controle = new AccessControl();
 /*--    DESCRIÇÃO DOS CARGOS     --
-  ADMIN     -> Acesso a qualquer rota
-  EDITOR    -> Pode visualizar qualquer post, apenas criar e deletar os próprios posts
-  ASSINANTE -> Pode apenas visualizar qualquer posts
+  ADMIN     -> Acesso a qualquer rota, com todos os dados
+  ASSINANTE -> Pode apenas visualizar qualquer post e apenas o nome dos usuários
+  EDITOR    -> Tem tudo que o assinante tem, mas pode criar e deletar os próprios posts
 */
 controle
   .grant("assinante")
-  .readAny("post", ["id", "titulo", "conteudo", "autor"]);
+  .readAny("post", ["id", "titulo", "conteudo", "autor"])
+  .readAny("usuario", ["nome"]);
 
 controle
   .grant("editor")

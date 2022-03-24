@@ -2,6 +2,7 @@ const Usuario = require("./usuarios-modelo");
 const { InvalidArgumentError } = require("../erros");
 const tokens = require("./tokens");
 const { EmailVerificacao } = require("./emails");
+const { ConversorUsuario } = require("../conversores");
 
 function geraEndereco(rota, token) {
   const baseURL = process.env.BASE_URL;
@@ -60,7 +61,13 @@ module.exports = {
   async lista(req, res, next) {
     try {
       const usuarios = await Usuario.lista();
-      res.json(usuarios);
+      const conversor = new ConversorUsuario(
+        "json",
+        req.acesso.todos.permitido //verifica se o usuário tem acesso a visualizar todos os usuários ou apenas o dele
+          ? req.acesso.todos.atributos //mostra os atributos que ele pode ver de todos os usuários
+          : req.acesso.apenasSeu.atributos //mostra os atributos que ele pode ver do seu usuário
+      );
+      res.send(conversor.converter(usuarios));
     } catch (erro) {
       next(erro);
     }
