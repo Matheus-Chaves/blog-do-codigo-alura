@@ -1,11 +1,15 @@
+//Classe para centralizar a conversão dos posts, alterando a quantidade de campos que o usuário poderá visualizar de acordo com seu cargo
 class ConversorPost {
-  constructor(tipoDeConteudo) {
+  constructor(tipoDeConteudo, camposExtras = []) {
     this.tipoDeConteudo = tipoDeConteudo;
-    this.camposPublicos = ["titulo", "conteudo"];
+    this.camposPublicos = ["titulo", "conteudo"].concat(camposExtras);
   }
 
   converter(dados) {
-    dados = this.filtrar(dados);
+    //caso tenha "*" na nossa lista, isso representa que todos os campos da tabela Posts podem ser acessados e NÃO precisamos filtrar os dados
+    if (this.camposPublicos.indexOf("*") === -1) {
+      dados = this.filtrar(dados);
+    }
 
     if (this.tipoDeConteudo === "json") {
       return this.json(dados);

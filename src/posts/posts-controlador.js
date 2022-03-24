@@ -21,7 +21,12 @@ module.exports = {
   async lista(req, res) {
     try {
       let posts = await Post.listarTodos();
-      const conversor = new ConversorPost("json");
+      const conversor = new ConversorPost(
+        "json",
+        req.acesso.todos.permitido //se a pessoa tem permissão para ler todos os posts
+          ? req.acesso.todos.atributos //passa todos os atributos que ela pode ler
+          : req.acesso.apenasSeu.atributos //senão passa apenas os atributos dos seus próprios posts
+      );
 
       if (!req.estaAutenticado) {
         posts = posts.map((post) => {
