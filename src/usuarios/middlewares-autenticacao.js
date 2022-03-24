@@ -3,6 +3,7 @@ const Usuario = require("./usuarios-modelo");
 const tokens = require("./tokens");
 
 module.exports = {
+  //middleware para autenticar com senha e nome do user
   local(req, res, next) {
     passport.authenticate(
       "local",
@@ -26,6 +27,7 @@ module.exports = {
       }
     )(req, res, next);
   },
+  //middleware para autenticar via token Bearer
   bearer(req, res, next) {
     //bearer serve para tratar erros do access token e definir o corpo da requisição
     passport.authenticate(

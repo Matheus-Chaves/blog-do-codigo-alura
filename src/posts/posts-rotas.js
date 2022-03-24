@@ -23,7 +23,11 @@ module.exports = (app) => {
       postsControlador.obterDetalhes
     )
     .delete(
-      [middlewaresAutenticacao.bearer, autorizacao("post", "remover")],
+      [
+        middlewaresAutenticacao.bearer,
+        middlewaresAutenticacao.local, //dupla confirmação: necessário inserir login também para deletar
+        autorizacao("post", "remover"),
+      ],
       postsControlador.remover
     );
 };
