@@ -24,6 +24,7 @@ app.use((req, res, next) => {
 
   res.set({
     "Content-Type": "application/json",
+    "X-Powered-By": "Blog do Código",
   });
 
   next();
