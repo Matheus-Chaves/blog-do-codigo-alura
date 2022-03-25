@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { InvalidArgumentError } = require("../erros");
 const allowlistRefreshToken = require("../../redis/allowlist-refresh-token");
 const blocklistAcessToken = require("../../redis/blocklist-access-token");
-const { InvalidArgumentError } = require("../erros");
+const listaRedefinicao = require("../../redis/listaRedefinicaoDeSenha");
 
 function criaTokenJWT(id, [tempoQuantidade, tempoUnidade]) {
   const payload = { id };
@@ -35,9 +36,9 @@ function invalidaTokenJWT(token, blocklist) {
 }
 
 //Token Opaco também leva o nome de Refresh Token
-async function criaTokenOpaco(id, [tempoQuantidade], allowlist) {
+async function criaTokenOpaco(id, [tempoQuantidadeEmDias], allowlist) {
   const tokenOpaco = crypto.randomBytes(24).toString("hex");
-  const qtdDeDiasEmMilissegundos = 60 * 60 * 24 * tempoQuantidade * 1000;
+  const qtdDeDiasEmMilissegundos = 60 * 60 * 24 * tempoQuantidadeEmDias * 1000;
   const dataExpiracaoEmUnix = Math.round(
     (Date.now() + qtdDeDiasEmMilissegundos) / 1000
   );
@@ -73,8 +74,8 @@ function verificaTokenEnviado(token, nome) {
 module.exports = {
   access: {
     nome: "Access token",
-    lista: blocklistAcessToken,
     expiracao: [15, "m"],
+    lista: blocklistAcessToken,
     //cria o token definindo id do usuário e tempo de expiração
     cria(id) {
       return criaTokenJWT(id, this.expiracao);
@@ -90,8 +91,8 @@ module.exports = {
   },
   refresh: {
     nome: "Refresh token",
-    expiracao: [5],
     lista: allowlistRefreshToken,
+    expiracao: [5],
     cria(id) {
       return criaTokenOpaco(id, this.expiracao, this.lista);
     },
@@ -111,6 +112,17 @@ module.exports = {
     },
     verifica(token) {
       return verificaTokenJWT(token, this.nome);
+    },
+  },
+  redefinicaoDeSenha: {
+    nome: "Redefinição de senha",
+    expiracao: [1 / 24], //uma hora em dias = 1/24
+    lista: listaRedefinicao,
+    criarToken(id) {
+      return criaTokenOpaco(id, this.expiracao, this.lista);
+    },
+    verifica(token) {
+      return verificaTokenOpaco(token, this.nome, this.lista);
     },
   },
 };
